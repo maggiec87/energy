@@ -1,154 +1,205 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>能量日签</title>
-<script src="data.js"></script>
-<style>
-:root { --text:#2c2c2c; --secondary:#8a8a8a; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灵性能量日签</title>
+    <script src="data.js"></script>
+    <style>
+        :root {
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --aura-color: rgba(255, 255, 255, 0.6);
+            --star-color: #ffffff;
+        }
 
-/* ===== 主题颜色 ===== */
-body.energy-rose { --bg:linear-gradient(180deg,#fff0f5,#ffe6f0); --ring:rgba(244,114,182,0.25); --text:#2c2c2c; --secondary:#8a8a8a;}
-body.energy-moss { --bg:linear-gradient(180deg,#f4fff4,#e8f9e8); --ring:rgba(34,197,94,0.22); --text:#2c2c2c; --secondary:#7c7c7c;}
-body.energy-indigo { --bg:linear-gradient(180deg,#111827,#1f2937); --ring:rgba(99,102,241,0.3); --text:#e5e7eb; --secondary:#9ca3af;}
-body.energy-amber { --bg:linear-gradient(180deg,#fff9f0,#fef3c7); --ring:rgba(245,158,11,0.22); --text:#2c2c2c; --secondary:#8a8a8a;}
-body.energy-aura { --bg:linear-gradient(180deg,#f8faff,#eef2ff); --ring:rgba(168,85,247,0.2); --text:#2c2c2c; --secondary:#8a8a8a;}
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: "Optima", "Quicksand", "PingFang SC", sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            transition: background-color 1s ease, color 1s ease;
+        }
 
-/* ===== 基础 ===== */
-*{margin:0;padding:0;box-sizing:border-box;}
-body{min-height:100vh;background:var(--bg);color:var(--text);font-family:"Optima","PingFang SC","Microsoft YaHei",sans-serif;display:flex;justify-content:center;align-items:center;padding:20px;position:relative;overflow:hidden;transition:background 1s ease;}
-.container{position:relative;z-index:2;width:100%;max-width:520px;background:rgba(255,255,255,0.85);border-radius:20px;padding:56px 40px 60px;text-align:center;backdrop-filter:blur(10px);overflow:hidden;}
-body.energy-indigo .container{background: rgba(17,24,39,0.85);}
+        /* 星光背景层 */
+        #star-field {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; pointer-events: none;
+        }
 
-/* ===== 顶部标题 ===== */
-#title{font-size:1.5rem;font-weight:500;margin-bottom:20px;}
+        .star {
+            position: absolute; background: var(--star-color);
+            border-radius: 50%; opacity: 0;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
 
-/* ===== 日期/星期/天气 ===== */
-.date-section{margin-bottom:30px;}
-#day{font-size:5.2rem;font-weight:200;}
-#month-year{font-size:0.85rem;letter-spacing:4px;color:var(--secondary);}
-#weekday{margin-top:8px;font-size:0.75rem;letter-spacing:2px;color:var(--secondary);}
-#weather{font-size:1rem;margin-top:4px;}
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: var(--max-opacity); transform: scale(1.2); }
+        }
 
-/* ===== 分割线 ===== */
-.divider{width:48px;height:2px;background:linear-gradient(to right,transparent,currentColor,transparent);opacity:0.15;margin:0 auto 30px;}
+        .content {
+            position: relative; z-index: 10;
+            text-align: center; width: 90%; max-width: 600px;
+            display: flex; flex-direction: column; align-items: center;
+        }
 
-/* ===== 金句 ===== */
-#quote{min-height:180px;font-size:1.15rem;line-height:1.85;display:flex;align-items:center;justify-content:center;padding:0 12px;z-index:2;}
+        .date-box { margin-bottom: 4vh; letter-spacing: 4px; }
+        #day { font-size: clamp(4.5rem, 18vw, 7rem); font-weight: 100; margin: 0; line-height: 1; }
+        #sub-date { font-size: 0.7rem; opacity: 0.6; margin-top: 15px; text-transform: uppercase; }
 
-/* ===== 陪伴天数 ===== */
-#companion-days{margin-top:20px;font-size:0.7rem;color:var(--secondary);letter-spacing:1px;z-index:2;}
+        /* 增强版能量环 */
+        .aura-container {
+            position: relative;
+            width: clamp(300px, 85vw, 400px);
+            height: clamp(300px, 85vw, 400px);
+            display: flex; justify-content: center; align-items: center;
+        }
 
-/* ===== 右上主题选择 ===== */
-#theme-picker{position:absolute;top:20px;right:20px;z-index:3;background:rgba(255,255,255,0.7);border-radius:12px;padding:6px 10px;backdrop-filter:blur(6px);}
-#theme-picker select{border:none;background:none;font-size:0.85rem;color:#333;cursor:pointer;}
+        .aura-ring {
+            position: absolute; width: 100%; height: 100%;
+            border-radius: 50%;
+            /* 复合边框与外发光，增强可见度 */
+            border: 2px solid var(--aura-color);
+            box-shadow: 0 0 25px var(--aura-color), 
+                        inset 0 0 15px var(--aura-color);
+            animation: breathe 5s infinite ease-in-out;
+        }
 
-/* ===== 卡片能量图案 ===== */
-#energyPattern{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:300px;height:300px;z-index:0;opacity:0.25;}
-#energyPattern circle{fill:none;stroke:var(--ring);stroke-width:2;transform-origin:50% 50%;animation:rotate 20s linear infinite,scalePulse 4s ease-in-out infinite alternate;}
-@keyframes rotate{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-@keyframes scalePulse{0%{transform:scale(0.95);}100%{transform:scale(1.05);}}
+        .aura-ring-outer {
+            position: absolute; width: 115%; height: 115%;
+            border-radius: 50%;
+            border: 1px solid var(--aura-color);
+            opacity: 0.2;
+            animation: breathe 8s infinite ease-in-out reverse;
+        }
 
-/* ===== 星象随机 ===== */
-.star,.moon,.sun{position:absolute;z-index:0;}
-.star{width:2px;height:2px;background:#fff;border-radius:50%;}
-.moon{width:16px;height:16px;border-radius:50%;background:rgba(255,255,200,0.6);}
-.sun{width:16px;height:16px;border-radius:50%;background:rgba(255,200,50,0.6);}
-</style>
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.3; filter: blur(2px); }
+            50% { transform: scale(1.08); opacity: 0.7; filter: blur(4px); }
+        }
+
+        .quote-wrapper {
+            z-index: 15; padding: 0 25px;
+            display: flex; flex-direction: column; align-items: center; gap: 30px;
+        }
+
+        #quote {
+            font-size: clamp(1.1rem, 4.5vw, 1.35rem);
+            line-height: 2; font-weight: 300; letter-spacing: 1px;
+            max-width: 320px; transition: opacity 0.5s;
+        }
+
+        #refresh-btn {
+            background: transparent; border: 1px solid var(--text-color);
+            color: inherit; padding: 8px 25px; border-radius: 30px;
+            font-size: 0.7rem; letter-spacing: 2px; cursor: pointer;
+            backdrop-filter: blur(5px); transition: all 0.3s; opacity: 0.6;
+        }
+        #refresh-btn:hover { opacity: 1; background: rgba(128, 128, 128, 0.1); }
+
+        /* 右上角控制条 */
+        .top-color-bar {
+            position: fixed; top: 25px; right: 25px; z-index: 100;
+            display: flex; gap: 15px; padding: 10px 15px;
+            background: rgba(128, 128, 128, 0.1); border-radius: 30px;
+            backdrop-filter: blur(15px);
+        }
+
+        .dot {
+            width: 20px; height: 20px; border-radius: 50%;
+            cursor: pointer; border: 1px solid rgba(128, 128, 128, 0.2);
+            transition: transform 0.2s ease;
+        }
+        .dot:hover { transform: scale(1.3); }
+    </style>
 </head>
 <body>
 
-<div class="container">
-  <div id="title">能量日签</div>
-  <div class="date-section">
-    <div id="month-year"></div>
-    <div id="day"></div>
-    <div id="weekday"></div>
-    <div id="weather"></div>
-  </div>
-  <div class="divider"></div>
-  <div id="quote">正在与你此刻的状态对齐…</div>
-  <div id="companion-days"></div>
-  <!-- 卡片背景能量图案 -->
-  <svg id="energyPattern" viewBox="0 0 200 200">
-    <circle cx="100" cy="100" r="60"/>
-    <circle cx="100" cy="100" r="40"/>
-    <circle cx="100" cy="100" r="20"/>
-  </svg>
-</div>
+    <div id="star-field"></div>
 
-<!-- 右上角主题选择 -->
-<div id="theme-picker">
-  <select id="themeSelect">
-    <option value="energy-rose">Rose Flow</option>
-    <option value="energy-moss">Moss Calm</option>
-    <option value="energy-indigo">Indigo Night</option>
-    <option value="energy-amber">Amber Warm</option>
-    <option value="energy-aura">Aura Mist</option>
-  </select>
-</div>
+    <div class="top-color-bar">
+        <div class="dot" style="background: #ffffff;" onclick="setTheme('#ffffff', '#333333', 'rgba(0,0,0,0.3)', '#000000')"></div>
+        <div class="dot" style="background: #000000;" onclick="setTheme('#000000', '#ffffff', 'rgba(255,255,255,0.6)', '#ffffff')"></div>
+        <div class="dot" style="background: #FFF9E5;" onclick="setTheme('#FFF9E5', '#5D534A', 'rgba(93,83,74,0.4)', '#5D534A')"></div>
+        <div class="dot" style="background: #F3E5F5;" onclick="setTheme('#F3E5F5', '#4A4458', 'rgba(74,68,88,0.4)', '#4A4458')"></div>
+        <div class="dot" style="background: #FFF0F5;" onclick="setTheme('#FFF0F5', '#6B525A', 'rgba(107,82,90,0.4)', '#6B525A')"></div>
+    </div>
 
-<script>
-// 日期、星期、随机天气
-function renderDate(){
-  const now=new Date();
-  const days=['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
-  const months=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-  document.getElementById('day').innerText=now.getDate().toString().padStart(2,'0');
-  document.getElementById('month-year').innerText=`${months[now.getMonth()]} / ${now.getFullYear()}`;
-  document.getElementById('weekday').innerText=days[now.getDay()];
-  const weathers=['☀️','🌤️','🌙','🌧️'];
-  document.getElementById('weather').innerText=weathers[Math.floor(Math.random()*weathers.length)];
-}
+    <div class="content">
+        <div class="date-box">
+            <h1 id="day">--</h1>
+            <div id="sub-date">Connect to Universe</div>
+        </div>
 
-// 每日金句
-function displayDailyQuote(){
-  if(typeof quotesArray==='undefined') return;
-  const today=new Date().toDateString();
-  const key='dailyQuote_'+today;
-  let quote=localStorage.getItem(key);
-  if(!quote){
-    quote=quotesArray[Math.floor(Math.random()*quotesArray.length)];
-    localStorage.setItem(key,quote);
-  }
-  document.getElementById('quote').innerText=quote;
-}
+        <div class="aura-container">
+            <div class="aura-ring"></div>
+            <div class="aura-ring-outer"></div>
+            <div class="quote-wrapper">
+                <div id="quote">正在加载能量...</div>
+                <button id="refresh-btn" onclick="refreshQuote()">NEW ENERGY</button>
+            </div>
+        </div>
+    </div>
 
-// 陪伴天数
-function renderCompanionDays(){
-  const today=new Date().toDateString();
-  let days=JSON.parse(localStorage.getItem('openedDays')||'[]');
-  if(!days.includes(today)){days.push(today);localStorage.setItem('openedDays',JSON.stringify(days));}
-  document.getElementById('companion-days').innerText=`已与你共度 ${days.length} 天`;
-}
+    <script>
+        function initDate() {
+            const now = new Date();
+            const days = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
+            const months = ["JAN.", "FEB.", "MAR.", "APR.", "MAY.", "JUN.", "JUL.", "AUG.", "SEP.", "OCT.", "NOV.", "DEC."];
+            document.getElementById('day').innerText = String(now.getDate()).padStart(2, '0');
+            document.getElementById('sub-date').innerText = `${months[now.getMonth()]} ${now.getFullYear()} / ${days[now.getDay()]}`;
+        }
 
-// 主题选择
-function applyTheme(theme){
-  document.body.classList.remove('energy-rose','energy-moss','energy-indigo','energy-amber','energy-aura');
-  document.body.classList.add(theme);
-  localStorage.setItem('selectedTheme',theme);
-}
+        function refreshQuote() {
+            const source = (typeof quotes !== 'undefined') ? quotes : ["顺应流动的能量，万物自有定时。"];
+            const quoteEl = document.getElementById('quote');
+            quoteEl.style.opacity = 0;
+            setTimeout(() => {
+                const randomIdx = Math.floor(Math.random() * source.length);
+                quoteEl.innerText = source[randomIdx];
+                quoteEl.style.opacity = 1;
+            }, 500);
+        }
 
-// 随机星象
-function generateStars(num){for(let i=0;i<num;i++){const s=document.createElement('div');s.className='star';s.style.top=Math.random()*100+'%';s.style.left=Math.random()*100+'%';s.style.width=1+Math.random()*2+'px';s.style.height=1+Math.random()*2+'px';s.style.opacity=Math.random();document.body.appendChild(s);}}
-function generateMoons(num){for(let i=0;i<num;i++){const m=document.createElement('div');m.className='moon';m.style.top=Math.random()*80+'%';m.style.left=Math.random()*80+'%';document.body.appendChild(m);}}
-function generateSuns(num){for(let i=0;i<num;i++){const s=document.createElement('div');s.className='sun';s.style.top=Math.random()*80+'%';s.style.left=Math.random()*80+'%';document.body.appendChild(s);}}
+        function setTheme(bg, text, aura, star) {
+            const root = document.documentElement;
+            root.style.setProperty('--bg-color', bg);
+            root.style.setProperty('--text-color', text);
+            root.style.setProperty('--aura-color', aura);
+            root.style.setProperty('--star-color', star);
+        }
 
-// 初始化
-renderDate();
-displayDailyQuote();
-renderCompanionDays();
-generateStars(50);
-generateMoons(2);
-generateSuns(2);
+        // 动态生成星光粒子
+        function createStars() {
+            const starField = document.getElementById('star-field');
+            const count = 60;
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 3 + 'px';
+                const x = Math.random() * 100 + '%';
+                const y = Math.random() * 100 + '%';
+                const duration = (Math.random() * 3 + 2) + 's';
+                const maxOpacity = Math.random() * 0.4 + 0.1;
+                
+                star.style.width = size;
+                star.style.height = size;
+                star.style.left = x;
+                star.style.top = y;
+                star.style.setProperty('--duration', duration);
+                star.style.setProperty('--max-opacity', maxOpacity);
+                star.style.animationDelay = Math.random() * 5 + 's';
+                
+                starField.appendChild(star);
+            }
+        }
 
-// 主题控件
-const themeSelect=document.getElementById('themeSelect');
-const savedTheme=localStorage.getItem('selectedTheme');
-if(savedTheme) applyTheme(savedTheme);
-themeSelect.value=savedTheme||'energy-rose';
-themeSelect.addEventListener('change',e=>applyTheme(e.target.value));
-</script>
+        initDate();
+        createStars();
+        window.onload = refreshQuote;
+    </script>
 </body>
 </html>
